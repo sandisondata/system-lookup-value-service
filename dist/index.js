@@ -40,7 +40,7 @@ const lookupService = __importStar(require("repository-lookup-service"));
 const debugSource = 'lookup-value.service';
 const debugRows = 3;
 const tableName = '_lookup_values';
-const instanceName = 'lookup value';
+const instanceName = 'lookup_value';
 const primaryKeyColumnNames = ['lookup_value_uuid'];
 const dataColumnNames = [
     'lookup_uuid',
