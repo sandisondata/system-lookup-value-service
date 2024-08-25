@@ -6,7 +6,7 @@ export type Data = {
     lookup_uuid: string;
     lookup_code: string;
     meaning: string;
-    description?: string;
+    description?: string | null;
     is_enabled?: boolean;
 };
 export type CreateData = PrimaryKey & Data;

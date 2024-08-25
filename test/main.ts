@@ -21,7 +21,8 @@ describe('main', (suiteContext) => {
     await lookupService.create(database.query, {
       lookup_uuid: lookupUUID,
       lookup_type: 'status',
-      meaning: 'Status',
+      meaning: 'Status meaning',
+      description: 'Status description',
     });
     uuid = uuidv4();
     debug.write(MessageType.Exit);
@@ -34,7 +35,8 @@ describe('main', (suiteContext) => {
         lookup_value_uuid: uuid,
         lookup_uuid: lookupUUID,
         lookup_code: 'open',
-        meaning: 'Open',
+        meaning: 'Open meaning',
+        description: 'Open description',
       });
     });
     debug.write(MessageType.Exit);
@@ -61,7 +63,7 @@ describe('main', (suiteContext) => {
       await update(
         query,
         { lookup_value_uuid: uuid },
-        { lookup_code: 'open2' },
+        { lookup_code: 'open2', description: null },
       );
     });
     debug.write(MessageType.Exit);
