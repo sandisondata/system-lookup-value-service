@@ -11,7 +11,7 @@ export type Data = {
 };
 export type CreateData = PrimaryKey & Data;
 export type Row = PrimaryKey & Required<Data>;
-export type UpdateData = Partial<Omit<Data, 'lookup_uuid'>>;
+export type UpdateData = Partial<Data>;
 export declare const create: (query: Query, createData: CreateData) => Promise<Row>;
 export declare const find: (query: Query) => Promise<Row[]>;
 export declare const findOne: (query: Query, primaryKey: PrimaryKey) => Promise<Row>;

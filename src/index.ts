@@ -8,6 +8,7 @@ import {
   updateRow,
 } from 'database-helpers';
 import { Debug, MessageType } from 'node-debug';
+import { BadRequestError } from 'node-errors';
 import { objectsEqual, pick } from 'node-utilities';
 import * as lookupService from 'repository-lookup-service';
 
@@ -41,7 +42,7 @@ export type Data = {
 
 export type CreateData = PrimaryKey & Data;
 export type Row = PrimaryKey & Required<Data>;
-export type UpdateData = Partial<Omit<Data, 'lookup_uuid'>>;
+export type UpdateData = Partial<Data>;
 
 export const create = async (query: Query, createData: CreateData) => {
   const debug = new Debug(`${debugSource}.create`);
@@ -146,6 +147,9 @@ export const update = async (
     !objectsEqual(pick(mergedRow, dataColumnNames), pick(row, dataColumnNames))
   ) {
     debug.write(MessageType.Step, 'Validating data...');
+    if (mergedRow.lookup_uuid !== row.lookup_uuid) {
+      throw new BadRequestError('lookup_uuid is not updateable');
+    }
     if (mergedRow.lookup_code !== row.lookup_code) {
       const uniqueKey1 = {
         lookup_uuid: row.lookup_uuid,

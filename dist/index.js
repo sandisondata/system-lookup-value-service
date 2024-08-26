@@ -35,6 +35,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.delete_ = exports.update = exports.findOne = exports.find = exports.create = void 0;
 const database_helpers_1 = require("database-helpers");
 const node_debug_1 = require("node-debug");
+const node_errors_1 = require("node-errors");
 const node_utilities_1 = require("node-utilities");
 const lookupService = __importStar(require("repository-lookup-service"));
 const debugSource = 'lookup-value.service';
@@ -119,6 +120,9 @@ const update = (query, primaryKey, updateData) => __awaiter(void 0, void 0, void
     let updatedRow = Object.assign({}, mergedRow);
     if (!(0, node_utilities_1.objectsEqual)((0, node_utilities_1.pick)(mergedRow, dataColumnNames), (0, node_utilities_1.pick)(row, dataColumnNames))) {
         debug.write(node_debug_1.MessageType.Step, 'Validating data...');
+        if (mergedRow.lookup_uuid !== row.lookup_uuid) {
+            throw new node_errors_1.BadRequestError('lookup_uuid is not updateable');
+        }
         if (mergedRow.lookup_code !== row.lookup_code) {
             const uniqueKey1 = {
                 lookup_uuid: row.lookup_uuid,
