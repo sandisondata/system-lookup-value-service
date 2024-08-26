@@ -53,7 +53,6 @@ export const create = async (query: Query, createData: CreateData) => {
   debug.write(MessageType.Value, `primaryKey=${JSON.stringify(primaryKey)}`);
   debug.write(MessageType.Step, 'Checking primary key...');
   await checkPrimaryKey(query, tableName, instanceName, primaryKey);
-  debug.write(MessageType.Step, 'Validating data...');
   const uniqueKey1 = {
     lookup_uuid: createData.lookup_uuid,
     lookup_code: createData.lookup_code,
@@ -146,7 +145,6 @@ export const update = async (
   if (
     !objectsEqual(pick(mergedRow, dataColumnNames), pick(row, dataColumnNames))
   ) {
-    debug.write(MessageType.Step, 'Validating data...');
     if (mergedRow.lookup_uuid !== row.lookup_uuid) {
       throw new BadRequestError('lookup_uuid is not updateable');
     }

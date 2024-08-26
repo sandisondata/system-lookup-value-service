@@ -60,7 +60,6 @@ const create = (query, createData) => __awaiter(void 0, void 0, void 0, function
     debug.write(node_debug_1.MessageType.Value, `primaryKey=${JSON.stringify(primaryKey)}`);
     debug.write(node_debug_1.MessageType.Step, 'Checking primary key...');
     yield (0, database_helpers_1.checkPrimaryKey)(query, tableName, instanceName, primaryKey);
-    debug.write(node_debug_1.MessageType.Step, 'Validating data...');
     const uniqueKey1 = {
         lookup_uuid: createData.lookup_uuid,
         lookup_code: createData.lookup_code,
@@ -119,7 +118,6 @@ const update = (query, primaryKey, updateData) => __awaiter(void 0, void 0, void
     debug.write(node_debug_1.MessageType.Value, `mergedRow=${JSON.stringify(mergedRow)}`);
     let updatedRow = Object.assign({}, mergedRow);
     if (!(0, node_utilities_1.objectsEqual)((0, node_utilities_1.pick)(mergedRow, dataColumnNames), (0, node_utilities_1.pick)(row, dataColumnNames))) {
-        debug.write(node_debug_1.MessageType.Step, 'Validating data...');
         if (mergedRow.lookup_uuid !== row.lookup_uuid) {
             throw new node_errors_1.BadRequestError('lookup_uuid is not updateable');
         }
