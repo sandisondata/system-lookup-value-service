@@ -40,10 +40,12 @@ export type Data = {
   is_enabled?: boolean;
 };
 
+type LookupValue = Omit<Required<Data>, 'lookup_uuid'>;
+
 export type CreateData = PrimaryKey & Data;
 export type CreatedRow = Required<PrimaryKey> & {
   lookup: lookupService.Row;
-} & Omit<Required<Data>, 'lookup_uuid'>;
+} & LookupValue;
 
 export type Row = Required<PrimaryKey> & Required<Data>;
 
@@ -90,15 +92,14 @@ export const create = async (
     columnNames,
   )) as Row;
   const lookupValue = pick(
-    createData,
+    row,
     dataColumnNames.filter((x) => x !== 'lookup_uuid'),
-  ) as Omit<Required<Data>, 'lookup_uuid'>;
-  const createdRow = Object.assign(
-    {},
-    pick(row, primaryKeyColumnNames) as Required<PrimaryKey>,
-    { lookup: lookup },
-    lookupValue,
-  );
+  ) as LookupValue;
+  const createdRow: CreatedRow = {
+    uuid: row.uuid,
+    lookup: lookup,
+    ...lookupValue,
+  };
   debug.write(MessageType.Value, `lookupValue=${JSON.stringify(lookupValue)}`);
   debug.write(MessageType.Step, 'Creating lookup value...');
   await createRow(query, `${lookup.lookup_type}_lookup_values`, lookupValue);

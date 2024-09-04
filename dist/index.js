@@ -82,8 +82,8 @@ const create = (query, createData) => __awaiter(void 0, void 0, void 0, function
     });
     debug.write(node_debug_1.MessageType.Step, 'Creating row...');
     const row = (yield (0, database_helpers_1.createRow)(query, tableName, createData, columnNames));
-    const lookupValue = (0, node_utilities_1.pick)(createData, dataColumnNames.filter((x) => x !== 'lookup_uuid'));
-    const createdRow = Object.assign({}, (0, node_utilities_1.pick)(row, primaryKeyColumnNames), { lookup: lookup }, lookupValue);
+    const lookupValue = (0, node_utilities_1.pick)(row, dataColumnNames.filter((x) => x !== 'lookup_uuid'));
+    const createdRow = Object.assign({ uuid: row.uuid, lookup: lookup }, lookupValue);
     debug.write(node_debug_1.MessageType.Value, `lookupValue=${JSON.stringify(lookupValue)}`);
     debug.write(node_debug_1.MessageType.Step, 'Creating lookup value...');
     yield (0, database_helpers_1.createRow)(query, `${lookup.lookup_type}_lookup_values`, lookupValue);

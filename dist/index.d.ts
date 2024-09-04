@@ -10,10 +10,11 @@ export type Data = {
     description?: string | null;
     is_enabled?: boolean;
 };
+type LookupValue = Omit<Required<Data>, 'lookup_uuid'>;
 export type CreateData = PrimaryKey & Data;
 export type CreatedRow = Required<PrimaryKey> & {
     lookup: lookupService.Row;
-} & Omit<Required<Data>, 'lookup_uuid'>;
+} & LookupValue;
 export type Row = Required<PrimaryKey> & Required<Data>;
 export type UpdateData = Partial<Data>;
 export type UpdatedRow = Row;
@@ -22,3 +23,4 @@ export declare const find: (query: Query) => Promise<Row[]>;
 export declare const findOne: (query: Query, primaryKey: PrimaryKey) => Promise<Row>;
 export declare const update: (query: Query, primaryKey: PrimaryKey, updateData: UpdateData) => Promise<UpdatedRow>;
 export declare const delete_: (query: Query, primaryKey: PrimaryKey) => Promise<void>;
+export {};
