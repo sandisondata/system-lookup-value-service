@@ -18,7 +18,7 @@ const debugRows = 3;
 const tableName = '_lookup_values';
 const instanceName = 'lookup_value';
 
-const primaryKeyColumnNames = ['lookup_value_uuid'];
+const primaryKeyColumnNames = ['uuid'];
 const dataColumnNames = [
   'lookup_uuid',
   'lookup_code',
@@ -29,7 +29,7 @@ const dataColumnNames = [
 const columnNames = [...primaryKeyColumnNames, ...dataColumnNames];
 
 export type PrimaryKey = {
-  lookup_value_uuid: string;
+  uuid?: string;
 };
 
 export type Data = {
@@ -41,18 +41,29 @@ export type Data = {
 };
 
 export type CreateData = PrimaryKey & Data;
-export type Row = PrimaryKey & Required<Data>;
-export type UpdateData = Partial<Data>;
+export type CreatedRow = Required<PrimaryKey> & {
+  lookup: lookupService.Row;
+} & Omit<Required<Data>, 'lookup_uuid'>;
 
-export const create = async (query: Query, createData: CreateData) => {
+export type Row = Required<PrimaryKey> & Required<Data>;
+
+export type UpdateData = Partial<Data>;
+export type UpdatedRow = Row;
+
+export const create = async (
+  query: Query,
+  createData: CreateData,
+): Promise<CreatedRow> => {
   const debug = new Debug(`${debugSource}.create`);
   debug.write(MessageType.Entry, `createData=${JSON.stringify(createData)}`);
-  const primaryKey: PrimaryKey = {
-    lookup_value_uuid: createData.lookup_value_uuid,
-  };
-  debug.write(MessageType.Value, `primaryKey=${JSON.stringify(primaryKey)}`);
-  debug.write(MessageType.Step, 'Checking primary key...');
-  await checkPrimaryKey(query, tableName, instanceName, primaryKey);
+  if (typeof createData !== 'undefined') {
+    const primaryKey: PrimaryKey = {
+      uuid: createData.uuid,
+    };
+    debug.write(MessageType.Value, `primaryKey=${JSON.stringify(primaryKey)}`);
+    debug.write(MessageType.Step, 'Checking primary key...');
+    await checkPrimaryKey(query, tableName, instanceName, primaryKey);
+  }
   const uniqueKey1 = {
     lookup_uuid: createData.lookup_uuid,
     lookup_code: createData.lookup_code,
@@ -69,22 +80,28 @@ export const create = async (query: Query, createData: CreateData) => {
   await checkUniqueKey(query, tableName, instanceName, uniqueKey2);
   debug.write(MessageType.Step, 'Finding lookup...');
   const lookup = await lookupService.findOne(query, {
-    lookup_uuid: createData.lookup_uuid,
+    uuid: createData.lookup_uuid,
   });
-  const lookupValue = pick(
-    createData,
-    dataColumnNames.filter((x) => x !== 'lookup_uuid'),
-  );
-  debug.write(MessageType.Value, `lookupValue=${JSON.stringify(lookupValue)}`);
-  debug.write(MessageType.Step, 'Creating lookup value...');
-  await createRow(query, `${lookup.lookup_type}_lookup_values`, lookupValue);
   debug.write(MessageType.Step, 'Creating row...');
-  const createdRow = (await createRow(
+  const row = (await createRow(
     query,
     tableName,
     createData,
     columnNames,
   )) as Row;
+  const lookupValue = pick(
+    createData,
+    dataColumnNames.filter((x) => x !== 'lookup_uuid'),
+  ) as Omit<Required<Data>, 'lookup_uuid'>;
+  const createdRow = Object.assign(
+    {},
+    pick(row, primaryKeyColumnNames) as Required<PrimaryKey>,
+    { lookup: lookup },
+    lookupValue,
+  );
+  debug.write(MessageType.Value, `lookupValue=${JSON.stringify(lookupValue)}`);
+  debug.write(MessageType.Step, 'Creating lookup value...');
+  await createRow(query, `${lookup.lookup_type}_lookup_values`, lookupValue);
   debug.write(MessageType.Exit, `createdRow=${JSON.stringify(createdRow)}`);
   return createdRow;
 };
@@ -94,9 +111,8 @@ export const find = async (query: Query) => {
   const debug = new Debug(`${debugSource}.find`);
   debug.write(MessageType.Entry);
   debug.write(MessageType.Step, 'Finding rows...');
-  const rows = (
-    await query(`SELECT * FROM ${tableName} ORDER BY lookup_value_uuid`)
-  ).rows as Row[];
+  const rows = (await query(`SELECT * FROM ${tableName} ORDER BY uuid`))
+    .rows as Row[];
   debug.write(
     MessageType.Exit,
     `rows(${debugRows})=${JSON.stringify(rows.slice(0, debugRows))}`,
@@ -123,7 +139,7 @@ export const update = async (
   query: Query,
   primaryKey: PrimaryKey,
   updateData: UpdateData,
-) => {
+): Promise<UpdatedRow> => {
   const debug = new Debug(`${debugSource}.update`);
   debug.write(
     MessageType.Entry,
@@ -174,15 +190,8 @@ export const update = async (
     }
     debug.write(MessageType.Step, 'Finding lookup...');
     const lookup = await lookupService.findOne(query, {
-      lookup_uuid: row.lookup_uuid,
+      uuid: row.lookup_uuid,
     });
-    debug.write(MessageType.Step, 'Updating lookup value...');
-    await updateRow(
-      query,
-      `${lookup.lookup_type}_lookup_values`,
-      { lookup_code: row.lookup_code },
-      updateData,
-    );
     debug.write(MessageType.Step, 'Updating row...');
     updatedRow = (await updateRow(
       query,
@@ -191,6 +200,13 @@ export const update = async (
       updateData,
       columnNames,
     )) as Row;
+    debug.write(MessageType.Step, 'Updating lookup value...');
+    await updateRow(
+      query,
+      `${lookup.lookup_type}_lookup_values`,
+      { lookup_code: updatedRow.lookup_code },
+      updateData,
+    );
   }
   debug.write(MessageType.Exit, `updatedRow=${JSON.stringify(updatedRow)}`);
   return updatedRow;
@@ -208,15 +224,15 @@ export const delete_ = async (query: Query, primaryKey: PrimaryKey) => {
     { forUpdate: true },
   )) as Row;
   debug.write(MessageType.Value, `row=${JSON.stringify(row)}`);
+  debug.write(MessageType.Step, 'Deleting row...');
+  await deleteRow(query, tableName, primaryKey);
   debug.write(MessageType.Step, 'Finding lookup...');
   const lookup = await lookupService.findOne(query, {
-    lookup_uuid: row.lookup_uuid,
+    uuid: row.lookup_uuid,
   });
   debug.write(MessageType.Step, 'Deleting lookup value...');
   await deleteRow(query, `${lookup.lookup_type}_lookup_values`, {
     lookup_code: row.lookup_code,
   });
-  debug.write(MessageType.Step, 'Deleting row...');
-  await deleteRow(query, tableName, primaryKey);
   debug.write(MessageType.Exit);
 };

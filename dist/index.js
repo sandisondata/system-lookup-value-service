@@ -42,7 +42,7 @@ const debugSource = 'lookup-value.service';
 const debugRows = 3;
 const tableName = '_lookup_values';
 const instanceName = 'lookup_value';
-const primaryKeyColumnNames = ['lookup_value_uuid'];
+const primaryKeyColumnNames = ['uuid'];
 const dataColumnNames = [
     'lookup_uuid',
     'lookup_code',
@@ -54,12 +54,14 @@ const columnNames = [...primaryKeyColumnNames, ...dataColumnNames];
 const create = (query, createData) => __awaiter(void 0, void 0, void 0, function* () {
     const debug = new node_debug_1.Debug(`${debugSource}.create`);
     debug.write(node_debug_1.MessageType.Entry, `createData=${JSON.stringify(createData)}`);
-    const primaryKey = {
-        lookup_value_uuid: createData.lookup_value_uuid,
-    };
-    debug.write(node_debug_1.MessageType.Value, `primaryKey=${JSON.stringify(primaryKey)}`);
-    debug.write(node_debug_1.MessageType.Step, 'Checking primary key...');
-    yield (0, database_helpers_1.checkPrimaryKey)(query, tableName, instanceName, primaryKey);
+    if (typeof createData !== 'undefined') {
+        const primaryKey = {
+            uuid: createData.uuid,
+        };
+        debug.write(node_debug_1.MessageType.Value, `primaryKey=${JSON.stringify(primaryKey)}`);
+        debug.write(node_debug_1.MessageType.Step, 'Checking primary key...');
+        yield (0, database_helpers_1.checkPrimaryKey)(query, tableName, instanceName, primaryKey);
+    }
     const uniqueKey1 = {
         lookup_uuid: createData.lookup_uuid,
         lookup_code: createData.lookup_code,
@@ -76,14 +78,15 @@ const create = (query, createData) => __awaiter(void 0, void 0, void 0, function
     yield (0, database_helpers_1.checkUniqueKey)(query, tableName, instanceName, uniqueKey2);
     debug.write(node_debug_1.MessageType.Step, 'Finding lookup...');
     const lookup = yield lookupService.findOne(query, {
-        lookup_uuid: createData.lookup_uuid,
+        uuid: createData.lookup_uuid,
     });
+    debug.write(node_debug_1.MessageType.Step, 'Creating row...');
+    const row = (yield (0, database_helpers_1.createRow)(query, tableName, createData, columnNames));
     const lookupValue = (0, node_utilities_1.pick)(createData, dataColumnNames.filter((x) => x !== 'lookup_uuid'));
+    const createdRow = Object.assign({}, (0, node_utilities_1.pick)(row, primaryKeyColumnNames), { lookup: lookup }, lookupValue);
     debug.write(node_debug_1.MessageType.Value, `lookupValue=${JSON.stringify(lookupValue)}`);
     debug.write(node_debug_1.MessageType.Step, 'Creating lookup value...');
     yield (0, database_helpers_1.createRow)(query, `${lookup.lookup_type}_lookup_values`, lookupValue);
-    debug.write(node_debug_1.MessageType.Step, 'Creating row...');
-    const createdRow = (yield (0, database_helpers_1.createRow)(query, tableName, createData, columnNames));
     debug.write(node_debug_1.MessageType.Exit, `createdRow=${JSON.stringify(createdRow)}`);
     return createdRow;
 });
@@ -93,7 +96,8 @@ const find = (query) => __awaiter(void 0, void 0, void 0, function* () {
     const debug = new node_debug_1.Debug(`${debugSource}.find`);
     debug.write(node_debug_1.MessageType.Entry);
     debug.write(node_debug_1.MessageType.Step, 'Finding rows...');
-    const rows = (yield query(`SELECT * FROM ${tableName} ORDER BY lookup_value_uuid`)).rows;
+    const rows = (yield query(`SELECT * FROM ${tableName} ORDER BY uuid`))
+        .rows;
     debug.write(node_debug_1.MessageType.Exit, `rows(${debugRows})=${JSON.stringify(rows.slice(0, debugRows))}`);
     return rows;
 });
@@ -141,12 +145,12 @@ const update = (query, primaryKey, updateData) => __awaiter(void 0, void 0, void
         }
         debug.write(node_debug_1.MessageType.Step, 'Finding lookup...');
         const lookup = yield lookupService.findOne(query, {
-            lookup_uuid: row.lookup_uuid,
+            uuid: row.lookup_uuid,
         });
-        debug.write(node_debug_1.MessageType.Step, 'Updating lookup value...');
-        yield (0, database_helpers_1.updateRow)(query, `${lookup.lookup_type}_lookup_values`, { lookup_code: row.lookup_code }, updateData);
         debug.write(node_debug_1.MessageType.Step, 'Updating row...');
         updatedRow = (yield (0, database_helpers_1.updateRow)(query, tableName, primaryKey, updateData, columnNames));
+        debug.write(node_debug_1.MessageType.Step, 'Updating lookup value...');
+        yield (0, database_helpers_1.updateRow)(query, `${lookup.lookup_type}_lookup_values`, { lookup_code: updatedRow.lookup_code }, updateData);
     }
     debug.write(node_debug_1.MessageType.Exit, `updatedRow=${JSON.stringify(updatedRow)}`);
     return updatedRow;
@@ -158,16 +162,16 @@ const delete_ = (query, primaryKey) => __awaiter(void 0, void 0, void 0, functio
     debug.write(node_debug_1.MessageType.Step, 'Finding row by primary key...');
     const row = (yield (0, database_helpers_1.findByPrimaryKey)(query, tableName, instanceName, primaryKey, { forUpdate: true }));
     debug.write(node_debug_1.MessageType.Value, `row=${JSON.stringify(row)}`);
+    debug.write(node_debug_1.MessageType.Step, 'Deleting row...');
+    yield (0, database_helpers_1.deleteRow)(query, tableName, primaryKey);
     debug.write(node_debug_1.MessageType.Step, 'Finding lookup...');
     const lookup = yield lookupService.findOne(query, {
-        lookup_uuid: row.lookup_uuid,
+        uuid: row.lookup_uuid,
     });
     debug.write(node_debug_1.MessageType.Step, 'Deleting lookup value...');
     yield (0, database_helpers_1.deleteRow)(query, `${lookup.lookup_type}_lookup_values`, {
         lookup_code: row.lookup_code,
     });
-    debug.write(node_debug_1.MessageType.Step, 'Deleting row...');
-    yield (0, database_helpers_1.deleteRow)(query, tableName, primaryKey);
     debug.write(node_debug_1.MessageType.Exit);
 });
 exports.delete_ = delete_;

@@ -17,8 +17,7 @@
     "node-debug": "github:gwfortington/node-debug",
     "node-errors": "github:gwfortington/node-errors",
     "node-utilities": "github:gwfortington/node-utilities",
-    "repository-lookup-service": "github:sandisondata/repository-lookup-service",
-    "uuid": "^10.0.0"
+    "repository-lookup-service": "github:sandisondata/repository-lookup-service"
   },
   "devDependencies": {
     "@tsconfig/recommended": "^1.0.6",
