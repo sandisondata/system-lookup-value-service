@@ -32,7 +32,7 @@ export type PrimaryKey = {
   uuid: string;
 };
 
-export type Lookup<Populate extends boolean = false> = Populate extends false
+export type Lookup<Populated extends boolean = false> = Populated extends false
   ? {
       lookup_uuid: string;
     }
@@ -47,14 +47,14 @@ export type LookupValue = {
   is_enabled?: boolean;
 };
 
-export type Data<Populate extends boolean = false> = Lookup<Populate> &
+export type Data<Populated extends boolean = false> = Lookup<Populated> &
   LookupValue;
 
 export type CreateData = Partial<PrimaryKey> & Data;
 export type CreatedRow = Row<true>;
 
-export type Row<Populate extends boolean = false> = PrimaryKey &
-  Required<Data<Populate>>;
+export type Row<Populated extends boolean = false> = PrimaryKey &
+  Required<Data<Populated>>;
 
 export type UpdateData = Partial<Data>;
 export type UpdatedRow = Row;

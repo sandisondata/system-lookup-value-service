@@ -3,7 +3,7 @@ import * as lookupService from 'repository-lookup-service';
 export type PrimaryKey = {
     uuid: string;
 };
-export type Lookup<Populate extends boolean = false> = Populate extends false ? {
+export type Lookup<Populated extends boolean = false> = Populated extends false ? {
     lookup_uuid: string;
 } : {
     lookup: lookupService.Row;
@@ -14,10 +14,10 @@ export type LookupValue = {
     description?: string | null;
     is_enabled?: boolean;
 };
-export type Data<Populate extends boolean = false> = Lookup<Populate> & LookupValue;
+export type Data<Populated extends boolean = false> = Lookup<Populated> & LookupValue;
 export type CreateData = Partial<PrimaryKey> & Data;
 export type CreatedRow = Row<true>;
-export type Row<Populate extends boolean = false> = PrimaryKey & Required<Data<Populate>>;
+export type Row<Populated extends boolean = false> = PrimaryKey & Required<Data<Populated>>;
 export type UpdateData = Partial<Data>;
 export type UpdatedRow = Row;
 export declare const create: (query: Query, createData: CreateData) => Promise<CreatedRow>;
