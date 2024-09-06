@@ -79,7 +79,7 @@ const create = (query, createData) => __awaiter(void 0, void 0, void 0, function
         uuid: createData.lookup_uuid,
     });
     debug.write(node_debug_1.MessageType.Step, 'Creating row...');
-    const row = (yield (0, database_helpers_1.createRow)(query, tableName, createData, columnNames));
+    const row = (yield (0, database_helpers_1.createRow)(query, tableName, createData));
     const lookupValue = (0, node_utilities_1.pick)(row, dataColumnNames.filter((x) => x !== 'lookup_uuid'));
     const createdRow = Object.assign({ uuid: row.uuid, lookup: lookup }, lookupValue);
     debug.write(node_debug_1.MessageType.Value, `lookupValue=${JSON.stringify(lookupValue)}`);

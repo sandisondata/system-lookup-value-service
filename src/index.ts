@@ -90,12 +90,7 @@ export const create = async (
     uuid: createData.lookup_uuid,
   });
   debug.write(MessageType.Step, 'Creating row...');
-  const row = (await createRow(
-    query,
-    tableName,
-    createData,
-    columnNames,
-  )) as Row;
+  const row = (await createRow(query, tableName, createData)) as Row;
   const lookupValue = pick(
     row,
     dataColumnNames.filter((x) => x !== 'lookup_uuid'),
