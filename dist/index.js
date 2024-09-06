@@ -54,10 +54,8 @@ const columnNames = [...primaryKeyColumnNames, ...dataColumnNames];
 const create = (query, createData) => __awaiter(void 0, void 0, void 0, function* () {
     const debug = new node_debug_1.Debug(`${debugSource}.create`);
     debug.write(node_debug_1.MessageType.Entry, `createData=${JSON.stringify(createData)}`);
-    if (typeof createData !== 'undefined') {
-        const primaryKey = {
-            uuid: createData.uuid,
-        };
+    if (typeof createData.uuid !== 'undefined') {
+        const primaryKey = { uuid: createData.uuid };
         debug.write(node_debug_1.MessageType.Value, `primaryKey=${JSON.stringify(primaryKey)}`);
         debug.write(node_debug_1.MessageType.Step, 'Checking primary key...');
         yield (0, database_helpers_1.checkPrimaryKey)(query, tableName, instanceName, primaryKey);

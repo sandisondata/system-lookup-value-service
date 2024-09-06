@@ -29,7 +29,7 @@ const dataColumnNames = [
 const columnNames = [...primaryKeyColumnNames, ...dataColumnNames];
 
 export type PrimaryKey = {
-  uuid?: string;
+  uuid: string;
 };
 
 export type Lookup<Populate extends boolean = false> = Populate extends false
@@ -50,10 +50,10 @@ export type LookupValue = {
 export type Data<Populate extends boolean = false> = Lookup<Populate> &
   LookupValue;
 
-export type CreateData = PrimaryKey & Data;
+export type CreateData = Partial<PrimaryKey> & Data;
 export type CreatedRow = Row<true>;
 
-export type Row<Populate extends boolean = false> = Required<PrimaryKey> &
+export type Row<Populate extends boolean = false> = PrimaryKey &
   Required<Data<Populate>>;
 
 export type UpdateData = Partial<Data>;
@@ -65,10 +65,8 @@ export const create = async (
 ): Promise<CreatedRow> => {
   const debug = new Debug(`${debugSource}.create`);
   debug.write(MessageType.Entry, `createData=${JSON.stringify(createData)}`);
-  if (typeof createData !== 'undefined') {
-    const primaryKey: PrimaryKey = {
-      uuid: createData.uuid,
-    };
+  if (typeof createData.uuid !== 'undefined') {
+    const primaryKey: PrimaryKey = { uuid: createData.uuid };
     debug.write(MessageType.Value, `primaryKey=${JSON.stringify(primaryKey)}`);
     debug.write(MessageType.Step, 'Checking primary key...');
     await checkPrimaryKey(query, tableName, instanceName, primaryKey);

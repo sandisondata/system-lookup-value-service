@@ -1,7 +1,7 @@
 import { Query } from 'database';
 import * as lookupService from 'repository-lookup-service';
 export type PrimaryKey = {
-    uuid?: string;
+    uuid: string;
 };
 export type Lookup<Populate extends boolean = false> = Populate extends false ? {
     lookup_uuid: string;
@@ -15,9 +15,9 @@ export type LookupValue = {
     is_enabled?: boolean;
 };
 export type Data<Populate extends boolean = false> = Lookup<Populate> & LookupValue;
-export type CreateData = PrimaryKey & Data;
+export type CreateData = Partial<PrimaryKey> & Data;
 export type CreatedRow = Row<true>;
-export type Row<Populate extends boolean = false> = Required<PrimaryKey> & Required<Data<Populate>>;
+export type Row<Populate extends boolean = false> = PrimaryKey & Required<Data<Populate>>;
 export type UpdateData = Partial<Data>;
 export type UpdatedRow = Row;
 export declare const create: (query: Query, createData: CreateData) => Promise<CreatedRow>;
