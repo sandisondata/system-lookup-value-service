@@ -47,13 +47,14 @@ export type LookupValue = {
   is_enabled?: boolean;
 };
 
-export type Data<PopulateLookup extends boolean = false> =
-  Lookup<PopulateLookup> & LookupValue;
+export type Data<Populate extends boolean = false> = Lookup<Populate> &
+  LookupValue;
 
 export type CreateData = PrimaryKey & Data;
-export type CreatedRow = Required<PrimaryKey> & Required<Data<true>>;
+export type CreatedRow = Row<true>;
 
-export type Row = Required<PrimaryKey> & Required<Data>;
+export type Row<Populate extends boolean = false> = Required<PrimaryKey> &
+  Required<Data<Populate>>;
 
 export type UpdateData = Partial<Data>;
 export type UpdatedRow = Row;
