@@ -32,13 +32,9 @@ export type PrimaryKey = {
   uuid: string;
 };
 
-export type Lookup<Populated extends boolean = false> = Populated extends false
-  ? {
-      lookup_uuid: string;
-    }
-  : {
-      lookup: lookupService.Row;
-    };
+export type Lookup = {
+  lookup_uuid: string;
+};
 
 export type LookupValue = {
   lookup_code: string;
@@ -47,22 +43,13 @@ export type LookupValue = {
   is_enabled?: boolean;
 };
 
-export type Data<Populated extends boolean = false> = Lookup<Populated> &
-  LookupValue;
+export type Data = Lookup & LookupValue;
 
 export type CreateData = Partial<PrimaryKey> & Data;
-export type CreatedRow = Row<true>;
-
-export type Row<Populated extends boolean = false> = PrimaryKey &
-  Required<Data<Populated>>;
-
+export type Row = PrimaryKey & Required<Data>;
 export type UpdateData = Partial<Data>;
-export type UpdatedRow = Row;
 
-export const create = async (
-  query: Query,
-  createData: CreateData,
-): Promise<CreatedRow> => {
+export const create = async (query: Query, createData: CreateData) => {
   const debug = new Debug(`${debugSource}.create`);
   debug.write(MessageType.Entry, `createData=${JSON.stringify(createData)}`);
   if (typeof createData.uuid !== 'undefined') {
@@ -71,6 +58,10 @@ export const create = async (
     debug.write(MessageType.Step, 'Checking primary key...');
     await checkPrimaryKey(query, tableName, instanceName, primaryKey);
   }
+  debug.write(MessageType.Step, 'Finding lookup...');
+  const lookup = await lookupService.findOne(query, {
+    uuid: createData.lookup_uuid,
+  });
   const uniqueKey1 = {
     lookup_uuid: createData.lookup_uuid,
     lookup_code: createData.lookup_code,
@@ -85,21 +76,12 @@ export const create = async (
   debug.write(MessageType.Value, `uniqueKey2=${JSON.stringify(uniqueKey2)}`);
   debug.write(MessageType.Step, 'Checking unique key 2...');
   await checkUniqueKey(query, tableName, instanceName, uniqueKey2);
-  debug.write(MessageType.Step, 'Finding lookup...');
-  const lookup = await lookupService.findOne(query, {
-    uuid: createData.lookup_uuid,
-  });
   debug.write(MessageType.Step, 'Creating row...');
-  const row = (await createRow(query, tableName, createData)) as Row;
+  const createdRow = (await createRow(query, tableName, createData)) as Row;
   const lookupValue = pick(
-    row,
+    createdRow,
     dataColumnNames.filter((x) => x !== 'lookup_uuid'),
   ) as LookupValue;
-  const createdRow = {
-    uuid: row.uuid,
-    lookup: lookup,
-    ...lookupValue,
-  } as CreatedRow;
   debug.write(MessageType.Value, `lookupValue=${JSON.stringify(lookupValue)}`);
   debug.write(MessageType.Step, 'Creating lookup value...');
   await createRow(query, `${lookup.lookup_type}_lookup_values`, lookupValue);
@@ -140,7 +122,7 @@ export const update = async (
   query: Query,
   primaryKey: PrimaryKey,
   updateData: UpdateData,
-): Promise<UpdatedRow> => {
+) => {
   const debug = new Debug(`${debugSource}.update`);
   debug.write(
     MessageType.Entry,

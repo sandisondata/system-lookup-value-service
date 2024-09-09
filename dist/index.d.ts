@@ -1,12 +1,9 @@
 import { Query } from 'database';
-import * as lookupService from 'repository-lookup-service';
 export type PrimaryKey = {
     uuid: string;
 };
-export type Lookup<Populated extends boolean = false> = Populated extends false ? {
+export type Lookup = {
     lookup_uuid: string;
-} : {
-    lookup: lookupService.Row;
 };
 export type LookupValue = {
     lookup_code: string;
@@ -14,14 +11,12 @@ export type LookupValue = {
     description?: string | null;
     is_enabled?: boolean;
 };
-export type Data<Populated extends boolean = false> = Lookup<Populated> & LookupValue;
+export type Data = Lookup & LookupValue;
 export type CreateData = Partial<PrimaryKey> & Data;
-export type CreatedRow = Row<true>;
-export type Row<Populated extends boolean = false> = PrimaryKey & Required<Data<Populated>>;
+export type Row = PrimaryKey & Required<Data>;
 export type UpdateData = Partial<Data>;
-export type UpdatedRow = Row;
-export declare const create: (query: Query, createData: CreateData) => Promise<CreatedRow>;
-export declare const find: (query: Query) => Promise<Row<false>[]>;
-export declare const findOne: (query: Query, primaryKey: PrimaryKey) => Promise<Row<false>>;
-export declare const update: (query: Query, primaryKey: PrimaryKey, updateData: UpdateData) => Promise<UpdatedRow>;
+export declare const create: (query: Query, createData: CreateData) => Promise<Row>;
+export declare const find: (query: Query) => Promise<Row[]>;
+export declare const findOne: (query: Query, primaryKey: PrimaryKey) => Promise<Row>;
+export declare const update: (query: Query, primaryKey: PrimaryKey, updateData: UpdateData) => Promise<Row>;
 export declare const delete_: (query: Query, primaryKey: PrimaryKey) => Promise<void>;

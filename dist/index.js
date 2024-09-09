@@ -60,6 +60,10 @@ const create = (query, createData) => __awaiter(void 0, void 0, void 0, function
         debug.write(node_debug_1.MessageType.Step, 'Checking primary key...');
         yield (0, database_helpers_1.checkPrimaryKey)(query, tableName, instanceName, primaryKey);
     }
+    debug.write(node_debug_1.MessageType.Step, 'Finding lookup...');
+    const lookup = yield lookupService.findOne(query, {
+        uuid: createData.lookup_uuid,
+    });
     const uniqueKey1 = {
         lookup_uuid: createData.lookup_uuid,
         lookup_code: createData.lookup_code,
@@ -74,14 +78,9 @@ const create = (query, createData) => __awaiter(void 0, void 0, void 0, function
     debug.write(node_debug_1.MessageType.Value, `uniqueKey2=${JSON.stringify(uniqueKey2)}`);
     debug.write(node_debug_1.MessageType.Step, 'Checking unique key 2...');
     yield (0, database_helpers_1.checkUniqueKey)(query, tableName, instanceName, uniqueKey2);
-    debug.write(node_debug_1.MessageType.Step, 'Finding lookup...');
-    const lookup = yield lookupService.findOne(query, {
-        uuid: createData.lookup_uuid,
-    });
     debug.write(node_debug_1.MessageType.Step, 'Creating row...');
-    const row = (yield (0, database_helpers_1.createRow)(query, tableName, createData));
-    const lookupValue = (0, node_utilities_1.pick)(row, dataColumnNames.filter((x) => x !== 'lookup_uuid'));
-    const createdRow = Object.assign({ uuid: row.uuid, lookup: lookup }, lookupValue);
+    const createdRow = (yield (0, database_helpers_1.createRow)(query, tableName, createData));
+    const lookupValue = (0, node_utilities_1.pick)(createdRow, dataColumnNames.filter((x) => x !== 'lookup_uuid'));
     debug.write(node_debug_1.MessageType.Value, `lookupValue=${JSON.stringify(lookupValue)}`);
     debug.write(node_debug_1.MessageType.Step, 'Creating lookup value...');
     yield (0, database_helpers_1.createRow)(query, `${lookup.lookup_type}_lookup_values`, lookupValue);
