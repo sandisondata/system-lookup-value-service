@@ -84,7 +84,7 @@ export const create = async (query: Query, createData: CreateData) => {
   ) as LookupValue;
   debug.write(MessageType.Value, `lookupValue=${JSON.stringify(lookupValue)}`);
   debug.write(MessageType.Step, 'Creating lookup value...');
-  await createRow(query, `${lookup.lookup_type}_lookup_values`, lookupValue);
+  await createRow(query, `${lookup.lookup_type}${tableName}`, lookupValue);
   debug.write(MessageType.Exit, `createdRow=${JSON.stringify(createdRow)}`);
   return createdRow;
 };
@@ -150,7 +150,7 @@ export const update = async (
     if (mergedRow.lookup_code !== row.lookup_code) {
       const uniqueKey1 = {
         lookup_uuid: row.lookup_uuid,
-        lookup_code: updateData.lookup_code,
+        lookup_code: updateData.lookup_code!,
       };
       debug.write(
         MessageType.Value,
@@ -162,7 +162,7 @@ export const update = async (
     if (mergedRow.meaning !== row.meaning) {
       const uniqueKey2 = {
         lookup_uuid: row.lookup_uuid,
-        lookup_code: updateData.meaning,
+        lookup_code: updateData.meaning!,
       };
       debug.write(
         MessageType.Value,
@@ -186,7 +186,7 @@ export const update = async (
     debug.write(MessageType.Step, 'Updating lookup value...');
     await updateRow(
       query,
-      `${lookup.lookup_type}_lookup_values`,
+      `${lookup.lookup_type}${tableName}`,
       { lookup_code: updatedRow.lookup_code },
       updateData,
     );
@@ -214,7 +214,7 @@ export const delete_ = async (query: Query, primaryKey: PrimaryKey) => {
     uuid: row.lookup_uuid,
   });
   debug.write(MessageType.Step, 'Deleting lookup value...');
-  await deleteRow(query, `${lookup.lookup_type}_lookup_values`, {
+  await deleteRow(query, `${lookup.lookup_type}${tableName}`, {
     lookup_code: row.lookup_code,
   });
   debug.write(MessageType.Exit);

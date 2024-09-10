@@ -83,7 +83,7 @@ const create = (query, createData) => __awaiter(void 0, void 0, void 0, function
     const lookupValue = (0, node_utilities_1.pick)(createdRow, dataColumnNames.filter((x) => x !== 'lookup_uuid'));
     debug.write(node_debug_1.MessageType.Value, `lookupValue=${JSON.stringify(lookupValue)}`);
     debug.write(node_debug_1.MessageType.Step, 'Creating lookup value...');
-    yield (0, database_helpers_1.createRow)(query, `${lookup.lookup_type}_lookup_values`, lookupValue);
+    yield (0, database_helpers_1.createRow)(query, `${lookup.lookup_type}${tableName}`, lookupValue);
     debug.write(node_debug_1.MessageType.Exit, `createdRow=${JSON.stringify(createdRow)}`);
     return createdRow;
 });
@@ -147,7 +147,7 @@ const update = (query, primaryKey, updateData) => __awaiter(void 0, void 0, void
         debug.write(node_debug_1.MessageType.Step, 'Updating row...');
         updatedRow = (yield (0, database_helpers_1.updateRow)(query, tableName, primaryKey, updateData, columnNames));
         debug.write(node_debug_1.MessageType.Step, 'Updating lookup value...');
-        yield (0, database_helpers_1.updateRow)(query, `${lookup.lookup_type}_lookup_values`, { lookup_code: updatedRow.lookup_code }, updateData);
+        yield (0, database_helpers_1.updateRow)(query, `${lookup.lookup_type}${tableName}`, { lookup_code: updatedRow.lookup_code }, updateData);
     }
     debug.write(node_debug_1.MessageType.Exit, `updatedRow=${JSON.stringify(updatedRow)}`);
     return updatedRow;
@@ -166,7 +166,7 @@ const delete_ = (query, primaryKey) => __awaiter(void 0, void 0, void 0, functio
         uuid: row.lookup_uuid,
     });
     debug.write(node_debug_1.MessageType.Step, 'Deleting lookup value...');
-    yield (0, database_helpers_1.deleteRow)(query, `${lookup.lookup_type}_lookup_values`, {
+    yield (0, database_helpers_1.deleteRow)(query, `${lookup.lookup_type}${tableName}`, {
         lookup_code: row.lookup_code,
     });
     debug.write(node_debug_1.MessageType.Exit);
