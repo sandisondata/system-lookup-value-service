@@ -122,6 +122,10 @@ const update = (query, primaryKey, updateData) => __awaiter(void 0, void 0, void
         if (mergedRow.lookup_uuid !== row.lookup_uuid) {
             throw new node_errors_1.BadRequestError('lookup_uuid is not updateable');
         }
+        debug.write(node_debug_1.MessageType.Step, 'Finding lookup...');
+        const lookup = yield lookupService.findOne(query, {
+            uuid: row.lookup_uuid,
+        });
         if (mergedRow.lookup_code !== row.lookup_code) {
             const uniqueKey1 = {
                 lookup_uuid: row.lookup_uuid,
@@ -140,14 +144,10 @@ const update = (query, primaryKey, updateData) => __awaiter(void 0, void 0, void
             debug.write(node_debug_1.MessageType.Step, 'Checking unique key 2...');
             yield (0, database_helpers_1.checkUniqueKey)(query, tableName, instanceName, uniqueKey2);
         }
-        debug.write(node_debug_1.MessageType.Step, 'Finding lookup...');
-        const lookup = yield lookupService.findOne(query, {
-            uuid: row.lookup_uuid,
-        });
         debug.write(node_debug_1.MessageType.Step, 'Updating row...');
         updatedRow = (yield (0, database_helpers_1.updateRow)(query, tableName, primaryKey, updateData, columnNames));
         debug.write(node_debug_1.MessageType.Step, 'Updating lookup value...');
-        yield (0, database_helpers_1.updateRow)(query, `${lookup.lookup_type}${tableName}`, { lookup_code: updatedRow.lookup_code }, updateData);
+        yield (0, database_helpers_1.updateRow)(query, `${lookup.lookup_type}${tableName}`, { lookup_code: row.lookup_code }, (0, node_utilities_1.pick)(updateData, dataColumnNames.filter((x) => x !== 'lookup_uuid')));
     }
     debug.write(node_debug_1.MessageType.Exit, `updatedRow=${JSON.stringify(updatedRow)}`);
     return updatedRow;

@@ -147,6 +147,10 @@ export const update = async (
     if (mergedRow.lookup_uuid !== row.lookup_uuid) {
       throw new BadRequestError('lookup_uuid is not updateable');
     }
+    debug.write(MessageType.Step, 'Finding lookup...');
+    const lookup = await lookupService.findOne(query, {
+      uuid: row.lookup_uuid,
+    });
     if (mergedRow.lookup_code !== row.lookup_code) {
       const uniqueKey1 = {
         lookup_uuid: row.lookup_uuid,
@@ -171,10 +175,6 @@ export const update = async (
       debug.write(MessageType.Step, 'Checking unique key 2...');
       await checkUniqueKey(query, tableName, instanceName, uniqueKey2);
     }
-    debug.write(MessageType.Step, 'Finding lookup...');
-    const lookup = await lookupService.findOne(query, {
-      uuid: row.lookup_uuid,
-    });
     debug.write(MessageType.Step, 'Updating row...');
     updatedRow = (await updateRow(
       query,
@@ -187,8 +187,11 @@ export const update = async (
     await updateRow(
       query,
       `${lookup.lookup_type}${tableName}`,
-      { lookup_code: updatedRow.lookup_code },
-      updateData,
+      { lookup_code: row.lookup_code },
+      pick(
+        updateData,
+        dataColumnNames.filter((x) => x !== 'lookup_uuid'),
+      ),
     );
   }
   debug.write(MessageType.Exit, `updatedRow=${JSON.stringify(updatedRow)}`);
