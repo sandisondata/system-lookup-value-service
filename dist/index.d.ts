@@ -1,22 +1,3 @@
-import { Query } from 'database';
-export type PrimaryKey = {
-    uuid: string;
-};
-export type Lookup = {
-    lookup_uuid: string;
-};
-export type LookupValue = {
-    lookup_code: string;
-    meaning: string;
-    description?: string | null;
-    is_enabled?: boolean;
-};
-export type Data = Lookup & LookupValue;
-export type CreateData = Partial<PrimaryKey> & Data;
-export type Row = PrimaryKey & Required<Data>;
-export type UpdateData = Partial<Data>;
-export declare const create: (query: Query, createData: CreateData) => Promise<Row>;
-export declare const find: (query: Query) => Promise<Row[]>;
-export declare const findOne: (query: Query, primaryKey: PrimaryKey) => Promise<Row>;
-export declare const update: (query: Query, primaryKey: PrimaryKey, updateData: UpdateData) => Promise<Row>;
-export declare const delete_: (query: Query, primaryKey: PrimaryKey) => Promise<void>;
+import { Service } from './class';
+export declare const service: Service;
+export { CreateData, Data, PrimaryKey, Query, Row, UpdateData } from './class';
