@@ -29,7 +29,7 @@ export type Row = Required<PrimaryKey> & Required<Data>;
 
 let lookup: Lookup;
 
-const lookupValuesTableName = (lookupType: string) =>
+const getLookupValuesTableName = (lookupType: string) =>
   `${lookupType}_lookup_values`;
 
 export class Service extends BaseService<
@@ -45,6 +45,7 @@ export class Service extends BaseService<
     lookup = await lookupService.findOne(this.query, {
       uuid: this.createData.lookup_uuid,
     });
+    debug.write(MessageType.Value, `lookup=${JSON.stringify(lookup)}`);
     const uniqueKey1 = {
       lookup_uuid: this.createData.lookup_uuid,
       lookup_code: this.createData.lookup_code,
@@ -75,6 +76,7 @@ export class Service extends BaseService<
     lookup = await lookupService.findOne(this.query, {
       uuid: this.row.lookup_uuid,
     });
+    debug.write(MessageType.Value, `lookup=${JSON.stringify(lookup)}`);
     if (
       typeof this.updateData.lookup_code !== 'undefined' &&
       this.updateData.lookup_code !== this.row.lookup_code
@@ -115,36 +117,62 @@ export class Service extends BaseService<
     lookup = await lookupService.findOne(this.query, {
       uuid: this.row.lookup_uuid,
     });
+    debug.write(MessageType.Value, `lookup=${JSON.stringify(lookup)}`);
     debug.write(MessageType.Exit);
   }
 
   async postCreate() {
     const debug = new Debug(`${this.debugSource}.postCreate`);
     debug.write(MessageType.Entry);
-    debug.write(MessageType.Step, 'Creating lookup value...');
-    await createRow(this.query, lookupValuesTableName(lookup.lookup_type), {
+    const lookupValuesTableName = getLookupValuesTableName(lookup.lookup_type);
+    debug.write(
+      MessageType.Value,
+      `lookupValuesTableName=${lookupValuesTableName}`,
+    );
+    const lookupValue = {
       lookup_code: this.row.lookup_code,
       meaning: this.row.meaning,
       description: this.row.description,
       is_enabled: this.row.is_enabled,
-    });
+    };
+    debug.write(
+      MessageType.Value,
+      `lookupValue=${JSON.stringify(lookupValue)}`,
+    );
+    debug.write(MessageType.Step, 'Creating lookup value...');
+    await createRow(this.query, lookupValuesTableName, lookupValue);
     debug.write(MessageType.Exit);
   }
 
   async postUpdate() {
     const debug = new Debug(`${this.debugSource}.postUpdate`);
     debug.write(MessageType.Entry);
+    const lookupValuesTableName = getLookupValuesTableName(lookup.lookup_type);
+    debug.write(
+      MessageType.Value,
+      `lookupValuesTableName=${lookupValuesTableName}`,
+    );
+    const lookupValuePrimaryKey = { lookup_code: this.oldRow.lookup_code };
+    debug.write(
+      MessageType.Value,
+      `lookupValuePrimaryKey=${JSON.stringify(lookupValuePrimaryKey)}`,
+    );
+    const lookupValue = {
+      lookup_code: this.row.lookup_code,
+      meaning: this.row.meaning,
+      description: this.row.description,
+      is_enabled: this.row.is_enabled,
+    };
+    debug.write(
+      MessageType.Value,
+      `lookupValue=${JSON.stringify(lookupValue)}`,
+    );
     debug.write(MessageType.Step, 'Updating lookup value...');
     await updateRow(
       this.query,
-      lookupValuesTableName(lookup.lookup_type),
-      { lookup_code: this.oldRow.lookup_code },
-      {
-        lookup_code: this.row.lookup_code,
-        meaning: this.row.meaning,
-        description: this.row.description,
-        is_enabled: this.row.is_enabled,
-      },
+      lookupValuesTableName,
+      lookupValuePrimaryKey,
+      lookupValue,
     );
     debug.write(MessageType.Exit);
   }
@@ -152,10 +180,18 @@ export class Service extends BaseService<
   async postDelete() {
     const debug = new Debug(`${this.debugSource}.postDelete`);
     debug.write(MessageType.Entry);
+    const lookupValuesTableName = getLookupValuesTableName(lookup.lookup_type);
+    debug.write(
+      MessageType.Value,
+      `lookupValuesTableName=${lookupValuesTableName}`,
+    );
+    const lookupValuePrimaryKey = { lookup_code: this.row.lookup_code };
+    debug.write(
+      MessageType.Value,
+      `lookupValuePrimaryKey=${JSON.stringify(lookupValuePrimaryKey)}`,
+    );
     debug.write(MessageType.Step, 'Deleting lookup value...');
-    await deleteRow(this.query, lookupValuesTableName(lookup.lookup_type), {
-      lookup_code: this.row.lookup_code,
-    });
+    await deleteRow(this.query, lookupValuesTableName, lookupValuePrimaryKey);
     debug.write(MessageType.Exit);
   }
 }

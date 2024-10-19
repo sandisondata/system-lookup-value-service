@@ -16,7 +16,7 @@ const node_debug_1 = require("node-debug");
 const node_errors_1 = require("node-errors");
 const system_lookup_service_1 = require("system-lookup-service");
 let lookup;
-const lookupValuesTableName = (lookupType) => `${lookupType}_lookup_values`;
+const getLookupValuesTableName = (lookupType) => `${lookupType}_lookup_values`;
 class Service extends base_service_class_1.BaseService {
     preCreate() {
         return __awaiter(this, void 0, void 0, function* () {
@@ -26,6 +26,7 @@ class Service extends base_service_class_1.BaseService {
             lookup = yield system_lookup_service_1.service.findOne(this.query, {
                 uuid: this.createData.lookup_uuid,
             });
+            debug.write(node_debug_1.MessageType.Value, `lookup=${JSON.stringify(lookup)}`);
             const uniqueKey1 = {
                 lookup_uuid: this.createData.lookup_uuid,
                 lookup_code: this.createData.lookup_code,
@@ -55,6 +56,7 @@ class Service extends base_service_class_1.BaseService {
             lookup = yield system_lookup_service_1.service.findOne(this.query, {
                 uuid: this.row.lookup_uuid,
             });
+            debug.write(node_debug_1.MessageType.Value, `lookup=${JSON.stringify(lookup)}`);
             if (typeof this.updateData.lookup_code !== 'undefined' &&
                 this.updateData.lookup_code !== this.row.lookup_code) {
                 const uniqueKey1 = {
@@ -86,6 +88,7 @@ class Service extends base_service_class_1.BaseService {
             lookup = yield system_lookup_service_1.service.findOne(this.query, {
                 uuid: this.row.lookup_uuid,
             });
+            debug.write(node_debug_1.MessageType.Value, `lookup=${JSON.stringify(lookup)}`);
             debug.write(node_debug_1.MessageType.Exit);
         });
     }
@@ -93,13 +96,17 @@ class Service extends base_service_class_1.BaseService {
         return __awaiter(this, void 0, void 0, function* () {
             const debug = new node_debug_1.Debug(`${this.debugSource}.postCreate`);
             debug.write(node_debug_1.MessageType.Entry);
-            debug.write(node_debug_1.MessageType.Step, 'Creating lookup value...');
-            yield (0, database_helpers_1.createRow)(this.query, lookupValuesTableName(lookup.lookup_type), {
+            const lookupValuesTableName = getLookupValuesTableName(lookup.lookup_type);
+            debug.write(node_debug_1.MessageType.Value, `lookupValuesTableName=${lookupValuesTableName}`);
+            const lookupValue = {
                 lookup_code: this.row.lookup_code,
                 meaning: this.row.meaning,
                 description: this.row.description,
                 is_enabled: this.row.is_enabled,
-            });
+            };
+            debug.write(node_debug_1.MessageType.Value, `lookupValue=${JSON.stringify(lookupValue)}`);
+            debug.write(node_debug_1.MessageType.Step, 'Creating lookup value...');
+            yield (0, database_helpers_1.createRow)(this.query, lookupValuesTableName, lookupValue);
             debug.write(node_debug_1.MessageType.Exit);
         });
     }
@@ -107,13 +114,19 @@ class Service extends base_service_class_1.BaseService {
         return __awaiter(this, void 0, void 0, function* () {
             const debug = new node_debug_1.Debug(`${this.debugSource}.postUpdate`);
             debug.write(node_debug_1.MessageType.Entry);
-            debug.write(node_debug_1.MessageType.Step, 'Updating lookup value...');
-            yield (0, database_helpers_1.updateRow)(this.query, lookupValuesTableName(lookup.lookup_type), { lookup_code: this.oldRow.lookup_code }, {
+            const lookupValuesTableName = getLookupValuesTableName(lookup.lookup_type);
+            debug.write(node_debug_1.MessageType.Value, `lookupValuesTableName=${lookupValuesTableName}`);
+            const lookupValuePrimaryKey = { lookup_code: this.oldRow.lookup_code };
+            debug.write(node_debug_1.MessageType.Value, `lookupValuePrimaryKey=${JSON.stringify(lookupValuePrimaryKey)}`);
+            const lookupValue = {
                 lookup_code: this.row.lookup_code,
                 meaning: this.row.meaning,
                 description: this.row.description,
                 is_enabled: this.row.is_enabled,
-            });
+            };
+            debug.write(node_debug_1.MessageType.Value, `lookupValue=${JSON.stringify(lookupValue)}`);
+            debug.write(node_debug_1.MessageType.Step, 'Updating lookup value...');
+            yield (0, database_helpers_1.updateRow)(this.query, lookupValuesTableName, lookupValuePrimaryKey, lookupValue);
             debug.write(node_debug_1.MessageType.Exit);
         });
     }
@@ -121,10 +134,12 @@ class Service extends base_service_class_1.BaseService {
         return __awaiter(this, void 0, void 0, function* () {
             const debug = new node_debug_1.Debug(`${this.debugSource}.postDelete`);
             debug.write(node_debug_1.MessageType.Entry);
+            const lookupValuesTableName = getLookupValuesTableName(lookup.lookup_type);
+            debug.write(node_debug_1.MessageType.Value, `lookupValuesTableName=${lookupValuesTableName}`);
+            const lookupValuePrimaryKey = { lookup_code: this.row.lookup_code };
+            debug.write(node_debug_1.MessageType.Value, `lookupValuePrimaryKey=${JSON.stringify(lookupValuePrimaryKey)}`);
             debug.write(node_debug_1.MessageType.Step, 'Deleting lookup value...');
-            yield (0, database_helpers_1.deleteRow)(this.query, lookupValuesTableName(lookup.lookup_type), {
-                lookup_code: this.row.lookup_code,
-            });
+            yield (0, database_helpers_1.deleteRow)(this.query, lookupValuesTableName, lookupValuePrimaryKey);
             debug.write(node_debug_1.MessageType.Exit);
         });
     }
