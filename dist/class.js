@@ -16,16 +16,15 @@ const node_debug_1 = require("node-debug");
 const node_errors_1 = require("node-errors");
 const system_lookup_service_1 = require("system-lookup-service");
 let lookup;
-const getLookupValuesTableName = (lookupType) => `${lookupType}_lookup_values`;
 class Service extends base_service_class_1.BaseService {
     preCreate() {
         return __awaiter(this, void 0, void 0, function* () {
             const debug = new node_debug_1.Debug(`${this.debugSource}.preCreate`);
             debug.write(node_debug_1.MessageType.Entry);
+            const lookupPrimaryKey = { uuid: this.createData.lookup_uuid };
+            debug.write(node_debug_1.MessageType.Value, `lookupPrimaryKey=${JSON.stringify(lookupPrimaryKey)}`);
             debug.write(node_debug_1.MessageType.Step, 'Finding lookup...');
-            lookup = yield system_lookup_service_1.service.findOne(this.query, {
-                uuid: this.createData.lookup_uuid,
-            });
+            lookup = yield system_lookup_service_1.service.findOne(this.query, lookupPrimaryKey);
             debug.write(node_debug_1.MessageType.Value, `lookup=${JSON.stringify(lookup)}`);
             const uniqueKey1 = {
                 lookup_uuid: this.createData.lookup_uuid,
@@ -52,10 +51,10 @@ class Service extends base_service_class_1.BaseService {
                 this.updateData.lookup_uuid !== this.row.lookup_uuid) {
                 throw new node_errors_1.BadRequestError('lookup_uuid is not updateable');
             }
+            const lookupPrimaryKey = { uuid: this.row.lookup_uuid };
+            debug.write(node_debug_1.MessageType.Value, `lookupPrimaryKey=${JSON.stringify(lookupPrimaryKey)}`);
             debug.write(node_debug_1.MessageType.Step, 'Finding lookup...');
-            lookup = yield system_lookup_service_1.service.findOne(this.query, {
-                uuid: this.row.lookup_uuid,
-            });
+            lookup = yield system_lookup_service_1.service.findOne(this.query, lookupPrimaryKey);
             debug.write(node_debug_1.MessageType.Value, `lookup=${JSON.stringify(lookup)}`);
             if (typeof this.updateData.lookup_code !== 'undefined' &&
                 this.updateData.lookup_code !== this.row.lookup_code) {
@@ -84,10 +83,10 @@ class Service extends base_service_class_1.BaseService {
         return __awaiter(this, void 0, void 0, function* () {
             const debug = new node_debug_1.Debug(`${this.debugSource}.preDelete`);
             debug.write(node_debug_1.MessageType.Entry);
+            const lookupPrimaryKey = { uuid: this.row.lookup_uuid };
+            debug.write(node_debug_1.MessageType.Value, `lookupPrimaryKey=${JSON.stringify(lookupPrimaryKey)}`);
             debug.write(node_debug_1.MessageType.Step, 'Finding lookup...');
-            lookup = yield system_lookup_service_1.service.findOne(this.query, {
-                uuid: this.row.lookup_uuid,
-            });
+            lookup = yield system_lookup_service_1.service.findOne(this.query, lookupPrimaryKey);
             debug.write(node_debug_1.MessageType.Value, `lookup=${JSON.stringify(lookup)}`);
             debug.write(node_debug_1.MessageType.Exit);
         });
@@ -96,7 +95,7 @@ class Service extends base_service_class_1.BaseService {
         return __awaiter(this, void 0, void 0, function* () {
             const debug = new node_debug_1.Debug(`${this.debugSource}.postCreate`);
             debug.write(node_debug_1.MessageType.Entry);
-            const lookupValuesTableName = getLookupValuesTableName(lookup.lookup_type);
+            const lookupValuesTableName = `${lookup.lookup_type}${this.tableName}`;
             debug.write(node_debug_1.MessageType.Value, `lookupValuesTableName=${lookupValuesTableName}`);
             const lookupValue = {
                 lookup_code: this.row.lookup_code,
@@ -114,7 +113,7 @@ class Service extends base_service_class_1.BaseService {
         return __awaiter(this, void 0, void 0, function* () {
             const debug = new node_debug_1.Debug(`${this.debugSource}.postUpdate`);
             debug.write(node_debug_1.MessageType.Entry);
-            const lookupValuesTableName = getLookupValuesTableName(lookup.lookup_type);
+            const lookupValuesTableName = `${lookup.lookup_type}${this.tableName}`;
             debug.write(node_debug_1.MessageType.Value, `lookupValuesTableName=${lookupValuesTableName}`);
             const lookupValuePrimaryKey = { lookup_code: this.oldRow.lookup_code };
             debug.write(node_debug_1.MessageType.Value, `lookupValuePrimaryKey=${JSON.stringify(lookupValuePrimaryKey)}`);
@@ -134,7 +133,7 @@ class Service extends base_service_class_1.BaseService {
         return __awaiter(this, void 0, void 0, function* () {
             const debug = new node_debug_1.Debug(`${this.debugSource}.postDelete`);
             debug.write(node_debug_1.MessageType.Entry);
-            const lookupValuesTableName = getLookupValuesTableName(lookup.lookup_type);
+            const lookupValuesTableName = `${lookup.lookup_type}${this.tableName}`;
             debug.write(node_debug_1.MessageType.Value, `lookupValuesTableName=${lookupValuesTableName}`);
             const lookupValuePrimaryKey = { lookup_code: this.row.lookup_code };
             debug.write(node_debug_1.MessageType.Value, `lookupValuePrimaryKey=${JSON.stringify(lookupValuePrimaryKey)}`);

@@ -29,9 +29,6 @@ export type Row = Required<PrimaryKey> & Required<Data>;
 
 let lookup: Lookup;
 
-const getLookupValuesTableName = (lookupType: string) =>
-  `${lookupType}_lookup_values`;
-
 export class Service extends BaseService<
   PrimaryKey,
   CreateData,
@@ -41,10 +38,13 @@ export class Service extends BaseService<
   async preCreate() {
     const debug = new Debug(`${this.debugSource}.preCreate`);
     debug.write(MessageType.Entry);
+    const lookupPrimaryKey = { uuid: this.createData.lookup_uuid };
+    debug.write(
+      MessageType.Value,
+      `lookupPrimaryKey=${JSON.stringify(lookupPrimaryKey)}`,
+    );
     debug.write(MessageType.Step, 'Finding lookup...');
-    lookup = await lookupService.findOne(this.query, {
-      uuid: this.createData.lookup_uuid,
-    });
+    lookup = await lookupService.findOne(this.query, lookupPrimaryKey);
     debug.write(MessageType.Value, `lookup=${JSON.stringify(lookup)}`);
     const uniqueKey1 = {
       lookup_uuid: this.createData.lookup_uuid,
@@ -72,10 +72,13 @@ export class Service extends BaseService<
     ) {
       throw new BadRequestError('lookup_uuid is not updateable');
     }
+    const lookupPrimaryKey = { uuid: this.row.lookup_uuid };
+    debug.write(
+      MessageType.Value,
+      `lookupPrimaryKey=${JSON.stringify(lookupPrimaryKey)}`,
+    );
     debug.write(MessageType.Step, 'Finding lookup...');
-    lookup = await lookupService.findOne(this.query, {
-      uuid: this.row.lookup_uuid,
-    });
+    lookup = await lookupService.findOne(this.query, lookupPrimaryKey);
     debug.write(MessageType.Value, `lookup=${JSON.stringify(lookup)}`);
     if (
       typeof this.updateData.lookup_code !== 'undefined' &&
@@ -113,10 +116,13 @@ export class Service extends BaseService<
   async preDelete() {
     const debug = new Debug(`${this.debugSource}.preDelete`);
     debug.write(MessageType.Entry);
+    const lookupPrimaryKey = { uuid: this.row.lookup_uuid };
+    debug.write(
+      MessageType.Value,
+      `lookupPrimaryKey=${JSON.stringify(lookupPrimaryKey)}`,
+    );
     debug.write(MessageType.Step, 'Finding lookup...');
-    lookup = await lookupService.findOne(this.query, {
-      uuid: this.row.lookup_uuid,
-    });
+    lookup = await lookupService.findOne(this.query, lookupPrimaryKey);
     debug.write(MessageType.Value, `lookup=${JSON.stringify(lookup)}`);
     debug.write(MessageType.Exit);
   }
@@ -124,7 +130,7 @@ export class Service extends BaseService<
   async postCreate() {
     const debug = new Debug(`${this.debugSource}.postCreate`);
     debug.write(MessageType.Entry);
-    const lookupValuesTableName = getLookupValuesTableName(lookup.lookup_type);
+    const lookupValuesTableName = `${lookup.lookup_type}${this.tableName}`;
     debug.write(
       MessageType.Value,
       `lookupValuesTableName=${lookupValuesTableName}`,
@@ -147,7 +153,7 @@ export class Service extends BaseService<
   async postUpdate() {
     const debug = new Debug(`${this.debugSource}.postUpdate`);
     debug.write(MessageType.Entry);
-    const lookupValuesTableName = getLookupValuesTableName(lookup.lookup_type);
+    const lookupValuesTableName = `${lookup.lookup_type}${this.tableName}`;
     debug.write(
       MessageType.Value,
       `lookupValuesTableName=${lookupValuesTableName}`,
@@ -180,7 +186,7 @@ export class Service extends BaseService<
   async postDelete() {
     const debug = new Debug(`${this.debugSource}.postDelete`);
     debug.write(MessageType.Entry);
-    const lookupValuesTableName = getLookupValuesTableName(lookup.lookup_type);
+    const lookupValuesTableName = `${lookup.lookup_type}${this.tableName}`;
     debug.write(
       MessageType.Value,
       `lookupValuesTableName=${lookupValuesTableName}`,
