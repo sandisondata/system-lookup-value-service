@@ -1,4 +1,4 @@
-import { BaseService, Query } from 'base-service-class';
+import { BaseService } from 'base-service-class';
 import {
   checkUniqueKey,
   createRow,
@@ -9,13 +9,11 @@ import { Debug, MessageType } from 'node-debug';
 import { BadRequestError } from 'node-errors';
 import { Row as Lookup, service as lookupService } from 'system-lookup-service';
 
-export { Query };
-
 export type PrimaryKey = {
   uuid?: string;
 };
 
-export type Data = {
+type Data = {
   lookup_uuid: string;
   lookup_code: string;
   meaning: string;
@@ -68,11 +66,11 @@ export class Service extends BaseService<
     debug.write(MessageType.Entry);
     if (
       typeof this.updateData.lookup_uuid !== 'undefined' &&
-      this.updateData.lookup_uuid !== this.row.lookup_uuid
+      this.updateData.lookup_uuid !== this.existingRow.lookup_uuid
     ) {
       throw new BadRequestError('lookup_uuid is not updateable');
     }
-    const lookupPrimaryKey = { uuid: this.row.lookup_uuid };
+    const lookupPrimaryKey = { uuid: this.existingRow.lookup_uuid };
     debug.write(
       MessageType.Value,
       `lookupPrimaryKey=${JSON.stringify(lookupPrimaryKey)}`,
@@ -82,10 +80,10 @@ export class Service extends BaseService<
     debug.write(MessageType.Value, `lookup=${JSON.stringify(lookup)}`);
     if (
       typeof this.updateData.lookup_code !== 'undefined' &&
-      this.updateData.lookup_code !== this.row.lookup_code
+      this.updateData.lookup_code !== this.existingRow.lookup_code
     ) {
       const uniqueKey1 = {
-        lookup_uuid: this.row.lookup_uuid,
+        lookup_uuid: this.existingRow.lookup_uuid,
         lookup_code: this.updateData.lookup_code,
       };
       debug.write(
@@ -97,10 +95,10 @@ export class Service extends BaseService<
     }
     if (
       typeof this.updateData.meaning !== 'undefined' &&
-      this.updateData.meaning !== this.row.meaning
+      this.updateData.meaning !== this.existingRow.meaning
     ) {
       const uniqueKey2 = {
-        lookup_uuid: this.row.lookup_uuid,
+        lookup_uuid: this.existingRow.lookup_uuid,
         lookup_code: this.updateData.meaning,
       };
       debug.write(
@@ -116,7 +114,7 @@ export class Service extends BaseService<
   async preDelete() {
     const debug = new Debug(`${this.debugSource}.preDelete`);
     debug.write(MessageType.Entry);
-    const lookupPrimaryKey = { uuid: this.row.lookup_uuid };
+    const lookupPrimaryKey = { uuid: this.existingRow.lookup_uuid };
     debug.write(
       MessageType.Value,
       `lookupPrimaryKey=${JSON.stringify(lookupPrimaryKey)}`,
@@ -158,7 +156,7 @@ export class Service extends BaseService<
       MessageType.Value,
       `lookupValuesTableName=${lookupValuesTableName}`,
     );
-    const lookupValuePrimaryKey = { lookup_code: this.oldRow.lookup_code };
+    const lookupValuePrimaryKey = { lookup_code: this.existingRow.lookup_code };
     debug.write(
       MessageType.Value,
       `lookupValuePrimaryKey=${JSON.stringify(lookupValuePrimaryKey)}`,
@@ -191,7 +189,7 @@ export class Service extends BaseService<
       MessageType.Value,
       `lookupValuesTableName=${lookupValuesTableName}`,
     );
-    const lookupValuePrimaryKey = { lookup_code: this.row.lookup_code };
+    const lookupValuePrimaryKey = { lookup_code: this.existingRow.lookup_code };
     debug.write(
       MessageType.Value,
       `lookupValuePrimaryKey=${JSON.stringify(lookupValuePrimaryKey)}`,

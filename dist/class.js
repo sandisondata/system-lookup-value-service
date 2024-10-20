@@ -48,18 +48,18 @@ class Service extends base_service_class_1.BaseService {
             const debug = new node_debug_1.Debug(`${this.debugSource}.preUpdate`);
             debug.write(node_debug_1.MessageType.Entry);
             if (typeof this.updateData.lookup_uuid !== 'undefined' &&
-                this.updateData.lookup_uuid !== this.row.lookup_uuid) {
+                this.updateData.lookup_uuid !== this.existingRow.lookup_uuid) {
                 throw new node_errors_1.BadRequestError('lookup_uuid is not updateable');
             }
-            const lookupPrimaryKey = { uuid: this.row.lookup_uuid };
+            const lookupPrimaryKey = { uuid: this.existingRow.lookup_uuid };
             debug.write(node_debug_1.MessageType.Value, `lookupPrimaryKey=${JSON.stringify(lookupPrimaryKey)}`);
             debug.write(node_debug_1.MessageType.Step, 'Finding lookup...');
             lookup = yield system_lookup_service_1.service.findOne(this.query, lookupPrimaryKey);
             debug.write(node_debug_1.MessageType.Value, `lookup=${JSON.stringify(lookup)}`);
             if (typeof this.updateData.lookup_code !== 'undefined' &&
-                this.updateData.lookup_code !== this.row.lookup_code) {
+                this.updateData.lookup_code !== this.existingRow.lookup_code) {
                 const uniqueKey1 = {
-                    lookup_uuid: this.row.lookup_uuid,
+                    lookup_uuid: this.existingRow.lookup_uuid,
                     lookup_code: this.updateData.lookup_code,
                 };
                 debug.write(node_debug_1.MessageType.Value, `uniqueKey1=${JSON.stringify(uniqueKey1)}`);
@@ -67,9 +67,9 @@ class Service extends base_service_class_1.BaseService {
                 yield (0, database_helpers_1.checkUniqueKey)(this.query, this.tableName, uniqueKey1);
             }
             if (typeof this.updateData.meaning !== 'undefined' &&
-                this.updateData.meaning !== this.row.meaning) {
+                this.updateData.meaning !== this.existingRow.meaning) {
                 const uniqueKey2 = {
-                    lookup_uuid: this.row.lookup_uuid,
+                    lookup_uuid: this.existingRow.lookup_uuid,
                     lookup_code: this.updateData.meaning,
                 };
                 debug.write(node_debug_1.MessageType.Value, `uniqueKey2=${JSON.stringify(uniqueKey2)}`);
@@ -83,7 +83,7 @@ class Service extends base_service_class_1.BaseService {
         return __awaiter(this, void 0, void 0, function* () {
             const debug = new node_debug_1.Debug(`${this.debugSource}.preDelete`);
             debug.write(node_debug_1.MessageType.Entry);
-            const lookupPrimaryKey = { uuid: this.row.lookup_uuid };
+            const lookupPrimaryKey = { uuid: this.existingRow.lookup_uuid };
             debug.write(node_debug_1.MessageType.Value, `lookupPrimaryKey=${JSON.stringify(lookupPrimaryKey)}`);
             debug.write(node_debug_1.MessageType.Step, 'Finding lookup...');
             lookup = yield system_lookup_service_1.service.findOne(this.query, lookupPrimaryKey);
@@ -115,7 +115,7 @@ class Service extends base_service_class_1.BaseService {
             debug.write(node_debug_1.MessageType.Entry);
             const lookupValuesTableName = `${lookup.lookup_type}${this.tableName}`;
             debug.write(node_debug_1.MessageType.Value, `lookupValuesTableName=${lookupValuesTableName}`);
-            const lookupValuePrimaryKey = { lookup_code: this.oldRow.lookup_code };
+            const lookupValuePrimaryKey = { lookup_code: this.existingRow.lookup_code };
             debug.write(node_debug_1.MessageType.Value, `lookupValuePrimaryKey=${JSON.stringify(lookupValuePrimaryKey)}`);
             const lookupValue = {
                 lookup_code: this.row.lookup_code,
@@ -135,7 +135,7 @@ class Service extends base_service_class_1.BaseService {
             debug.write(node_debug_1.MessageType.Entry);
             const lookupValuesTableName = `${lookup.lookup_type}${this.tableName}`;
             debug.write(node_debug_1.MessageType.Value, `lookupValuesTableName=${lookupValuesTableName}`);
-            const lookupValuePrimaryKey = { lookup_code: this.row.lookup_code };
+            const lookupValuePrimaryKey = { lookup_code: this.existingRow.lookup_code };
             debug.write(node_debug_1.MessageType.Value, `lookupValuePrimaryKey=${JSON.stringify(lookupValuePrimaryKey)}`);
             debug.write(node_debug_1.MessageType.Step, 'Deleting lookup value...');
             yield (0, database_helpers_1.deleteRow)(this.query, lookupValuesTableName, lookupValuePrimaryKey);
