@@ -1,7 +1,7 @@
 {
   "name": "system-lookup-value-service",
   "version": "1.0.0",
-  "description": "System lookup value service",
+  "description": "System Lookup Value Service",
   "author": "Grant Fortington",
   "private": true,
   "license": "MIT",
